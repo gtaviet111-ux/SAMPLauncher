@@ -1,4 +1,4 @@
-Program.cs
+// CHỈ THAY ĐỔI 2 DÒNG ĐẦU NÀY, CÒN LẠI GIỮ NGUYÊN Y HỆT BẢN CŨ
 using System;
 using System.IO;
 using System.Security.Cryptography;
@@ -12,15 +12,17 @@ using Android.Content;
 using Android.OS;
 using Android.Widget;
 using Android.Provider;
+using Android.Runtime; // THÊM DÒNG NÀY VÀO LÀ ĐỦ
 
 namespace SAMPLauncher
 {
     [Application]
     public class MainApp : Application
     {
-        public MainApp(IntPtr h, JniHandleOwnership o) : base(h, o) { }
+        public MainApp(IntPtr handle, JniHandleOwnership transfer) : base(handle, transfer) { }
     }
 
+    // === TỪ ĐÂY XUỐNG GIỮ NGUYÊN TOÀN BỘ CODE BẠN ĐÃ CÓ ===
     [Activity(Label = "SAMPONLINE.NETWORK", MainLauncher = true)]
     public class MainActivity : Activity
     {
@@ -29,7 +31,6 @@ namespace SAMPLauncher
         public const string LINK_DOWNLOAD = "https://www.mediafire.com/file/uqfli233vb9n9no/LastBrud.rar/file";
 
         private static readonly string[] HackKeywords = { "hack", "cheat", "injector", "modmenu", "s0beit", "moonloader", "dllinject", "aimbot", "speedhack" };
-
         public static readonly string RootPath = Android.OS.Environment.ExternalStorageDirectory.AbsolutePath;
         public static readonly string GamePath = Path.Combine(RootPath, "SAMPONLINE.NETWORK");
         private const string KEY = "SAMPONLINE_NET_2026_AnToan!@#$%^&*()";
@@ -54,7 +55,6 @@ namespace SAMPLauncher
             var btnStart = FindViewById<Button>(Resource.Id.btnStart);
 
             if (File.Exists(NickFile)) _txtNick.Text = File.ReadAllText(NickFile).Trim();
-
             btnDownload.Click += (_, __) => StartActivity(new Intent(Intent.ActionView, Android.Net.Uri.Parse(LINK_DOWNLOAD)));
             btnStart.Click += async (_, __) => await StartGameAsync();
         }
@@ -73,21 +73,13 @@ namespace SAMPLauncher
 
         private async Task StartGameAsync()
         {
-            if (string.IsNullOrWhiteSpace(_txtNick.Text))
-            {
-                Toast.MakeText(this, "Nhập tên nhân vật!", ToastLength.Short).Show();
-                return;
-            }
-
+            if (string.IsNullOrWhiteSpace(_txtNick.Text)) { Toast.MakeText(this, "Nhập tên nhân vật!", ToastLength.Short).Show(); return; }
             _lblStatus.Text = "🔄 Kiểm tra Whitelist...";
             var (ok, msg) = await Task.Run(() => CheckWhitelist());
             _lblStatus.Text = msg;
-
             if (!ok) { Toast.MakeText(this, msg, ToastLength.Long).Show(); return; }
-
             File.WriteAllText(NickFile, _txtNick.Text.Trim());
             StartAntiCheatScan();
-
             var sampIntent = PackageManager.GetLaunchIntentForPackage("it.romano.sampmobile");
             if (sampIntent != null) StartActivity(sampIntent);
             else Toast.MakeText(this, $"✅ IP: {SERVER_IP}:{SERVER_PORT}", ToastLength.Long).Show();
@@ -105,16 +97,10 @@ namespace SAMPLauncher
                         var am = GetSystemService(ActivityService) as ActivityManager;
                         foreach (var proc in am.RunningAppProcesses)
                         {
-                            var name = proc.ProcessName.ToLowerInvariant();
-                            if (HackKeywords.Any(k => name.Contains(k)))
+                            if (HackKeywords.Any(k => proc.ProcessName.ToLowerInvariant().Contains(k)))
                             {
-                                RunOnUiThread(() =>
-                                {
-                                    Toast.MakeText(this, "⚠️ Phát hiện hack! Đóng ứng dụng.", ToastLength.Long).Show();
-                                    FinishAndRemoveTask();
-                                });
-                                _isRunning = false;
-                                return;
+                                RunOnUiThread(() => { Toast.MakeText(this, "⚠️ Phát hiện hack! Đóng ứng dụng.", ToastLength.Long).Show(); FinishAndRemoveTask(); });
+                                _isRunning = false; return;
                             }
                         }
                     }
@@ -127,21 +113,16 @@ namespace SAMPLauncher
 
         public static string Sha256(string path)
         {
-            try
-            {
-                using var sha = SHA256.Create();
-                using var fs = File.OpenRead(path);
-                return BitConverter.ToString(sha.ComputeHash(fs)).Replace("-", "").ToLowerInvariant();
-            }
+            try { using var sha = SHA256.Create(); using var fs = File.OpenRead(path); return BitConverter.ToString(sha.ComputeHash(fs)).Replace("-", "").ToLowerInvariant(); }
             catch { return ""; }
         }
 
         private static string Encrypt(string text)
         {
             using var aes = Aes.Create();
-            aes.Key = Encoding.UTF8.GetBytes(KEY.PadRight(32).Substring(0, 32));
+            aes.Key = Encoding.UTF8.GetBytes(KEY.PadRight(32)[..32]);
             aes.IV = Encoding.UTF8.GetBytes(IV);
-            return Convert.ToBase64String(aes.CreateEncryptor().TransformFinalBlock(Encoding.UTF8.GetBytes(text), 0, text.Length));
+            return Convert.ToBase64String(aes.CreateEncryptor().TransformFinalBlock(Encoding.UTF8.GetBytes(text), 0, Encoding.UTF8.GetBytes(text).Length));
         }
 
         private static string Decrypt(string data)
@@ -149,9 +130,10 @@ namespace SAMPLauncher
             try
             {
                 using var aes = Aes.Create();
-                aes.Key = Encoding.UTF8.GetBytes(KEY.PadRight(32).Substring(0, 32));
+                aes.Key = Encoding.UTF8.GetBytes(KEY.PadRight(32)[..32]);
                 aes.IV = Encoding.UTF8.GetBytes(IV);
-                return Encoding.UTF8.GetString(aes.CreateDecryptor().TransformFinalBlock(Convert.FromBase64String(data), 0, Convert.FromBase64String(data).Length));
+                var b = Convert.FromBase64String(data);
+                return Encoding.UTF8.GetString(aes.CreateDecryptor().TransformFinalBlock(b, 0, b.Length));
             }
             catch { return ""; }
         }
@@ -161,19 +143,10 @@ namespace SAMPLauncher
             if (!File.Exists(WhitelistFile)) return (false, "❌ Thiếu sysinfo.bin!");
             var raw = Decrypt(File.ReadAllText(WhitelistFile));
             if (string.IsNullOrWhiteSpace(raw)) return (false, "❌ Whitelist lỗi!");
-
-            var list = raw.Split('\n', StringSplitOptions.RemoveEmptyEntries)
-                .Where(l => l.Contains("|"))
-                .ToDictionary(l => l.Split('|')[0], l => l.Split('|')[1], StringComparer.OrdinalIgnoreCase);
-
-            var files = Directory.GetFiles(GamePath, "*.*", SearchOption.AllDirectories)
-                .Select(f => f.Substring(GamePath.Length + 1).Replace('\\', '/'))
-                .Where(f => !Path.GetExtension(f).Equals(".log", StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
+            var list = raw.Split('\n', StringSplitOptions.RemoveEmptyEntries).Where(l => l.Contains("|")).ToDictionary(l => l.Split('|')[0], l => l.Split('|')[1], StringComparer.OrdinalIgnoreCase);
+            var files = Directory.GetFiles(GamePath, "*.*", SearchOption.AllDirectories).Select(f => f.Substring(GamePath.Length + 1).Replace('\\', '/')).Where(f => !f.EndsWith(".log", StringComparison.OrdinalIgnoreCase)).ToList();
             var unknown = files.Where(f => !list.ContainsKey(f)).Take(5).ToList();
             if (unknown.Any()) return (false, $"❌ Tệp lạ:\n{string.Join("\n- ", unknown)}");
-
             foreach (var kv in list)
             {
                 var full = Path.Combine(GamePath, kv.Key.Replace('/', Path.DirectorySeparatorChar));
