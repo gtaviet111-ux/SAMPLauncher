@@ -1,7 +1,6 @@
-SAMPLauncher.MAUI.csproj
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net10.0-android</TargetFrameworks>
+    <TargetFrameworks>net9.0-android</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>SAMPLauncher</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -15,14 +14,11 @@ SAMPLauncher.MAUI.csproj
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AndroidMinSdkVersion>24</AndroidMinSdkVersion>
     <AndroidTargetSdkVersion>34</AndroidTargetSdkVersion>
-    <AndroidUseAapt2>true</AndroidUseAapt2>
-    <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.20" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="10.0.20" />
-    <PackageReference Include="Microsoft.Maui.Core" Version="10.0.20" />
+    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.61" />
+    <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.61" />
 
     <AndroidUsesPermission Include="android.permission.READ_EXTERNAL_STORAGE" />
     <AndroidUsesPermission Include="android.permission.WRITE_EXTERNAL_STORAGE" />
