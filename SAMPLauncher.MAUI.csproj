@@ -1,33 +1,31 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net9.0-android</TargetFrameworks>
+    <TargetFramework>net9.0-android</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>SAMPLauncher</RootNamespace>
-    <UseMaui>true</UseMaui>
-    <SingleProject>true</SingleProject>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <ApplicationTitle>SAMPONLINE.NETWORK</ApplicationTitle>
     <ApplicationId>com.samponline.launcher</ApplicationId>
     <ApplicationVersion>1</ApplicationVersion>
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
     <AndroidMinSdkVersion>24</AndroidMinSdkVersion>
     <AndroidTargetSdkVersion>34</AndroidTargetSdkVersion>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidUseAapt2>true</AndroidUseAapt2>
-    <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Maui.Controls" Version="9.0.61" />
-    <PackageReference Include="Microsoft.Maui.Essentials" Version="9.0.61" />
-    <PackageReference Include="Microsoft.Android.Sdk.Windows" Version="34.0.95" />
+    <AndroidResource Include="Resources\**\*" />
+    <None Include="bg_launcher.png" />
+  </ItemGroup>
 
-    <AndroidUsesPermission Include="android.permission.READ_EXTERNAL_STORAGE" />
-    <AndroidUsesPermission Include="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <AndroidUsesPermission Include="android.permission.MANAGE_EXTERNAL_STORAGE" />
-    <AndroidUsesPermission Include="android.permission.INTERNET" />
-    <AndroidUsesPermission Include="android.permission.FOREGROUND_SERVICE" />
-
-    <EmbeddedResource Include="bg_launcher.png" />
+  <ItemGroup>
+    <UsesPermission Include="android.permission.INTERNET" />
+    <UsesPermission Include="android.permission.READ_EXTERNAL_STORAGE" />
+    <UsesPermission Include="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <UsesPermission Include="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <UsesPermission Include="android.permission.FOREGROUND_SERVICE" />
+    <UsesPermission Include="android.permission.RECEIVE_BOOT_COMPLETED" />
   </ItemGroup>
 </Project>
